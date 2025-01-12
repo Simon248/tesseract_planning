@@ -26,4 +26,4 @@ jobs:
           publish_dir: ./docs
           destination_dir: tesseract_planning
           keep_files: true
-          external_repository: tesseract-robotics/tesseract_docs
+          external_repository: Simon248/tesseract_docs
