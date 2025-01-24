@@ -2,6 +2,34 @@
 Changelog for package tesseract_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.28.4 (2025-01-22)
+-------------------
+
+0.28.3 (2025-01-21)
+-------------------
+* Fix pick and place example
+* Contributors: Levi Armstrong
+
+0.28.2 (2025-01-21)
+-------------------
+* Fix cpack and add ruckig cpack generation and upload (`#585 <https://github.com/tesseract-robotics/tesseract_planning/issues/585>`_)
+* Contributors: Levi Armstrong
+
+0.28.1 (2025-01-16)
+-------------------
+
+0.28.0 (2025-01-16)
+-------------------
+* Fix cpack build and enable during CI pipeline
+* Leverage tesseract_common loadYamlFile and loadYamlString
+* Modify composite instruction constructor
+* Changes required now that environment return const shared pointers for getKinematicGroup and getJointGroup
+* New TrajOpt IFOPT profiles
+* Add new TrajOpt Profiles
+* Add simple ompl profile interface
+* Add profile base class and update profile dictionary to not leverage template methods
+* Contributors: Levi Armstrong
+
 0.27.0 (2024-12-01)
 -------------------
 * Update online example to pause every 10 seconds

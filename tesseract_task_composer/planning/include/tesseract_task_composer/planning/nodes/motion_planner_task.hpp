@@ -56,9 +56,6 @@ public:
   static const std::string INPUT_ENVIRONMENT_PORT;
   static const std::string INPUT_PROFILES_PORT;
 
-  // Optional
-  static const std::string INPUT_MANIP_INFO_PORT;
-
   MotionPlannerTask() : TaskComposerTask("MotionPlannerTask", MotionPlannerTask<MotionPlannerType>::ports(), true) {}
   explicit MotionPlannerTask(std::string name,  // NOLINT(performance-unnecessary-value-param)
                              std::string input_program_key,
@@ -127,8 +124,6 @@ protected:
     ports.input_required[INPUT_ENVIRONMENT_PORT] = TaskComposerNodePorts::SINGLE;
     ports.input_required[INPUT_PROFILES_PORT] = TaskComposerNodePorts::SINGLE;
 
-    ports.input_optional[INPUT_MANIP_INFO_PORT] = TaskComposerNodePorts::SINGLE;
-
     ports.output_required[INOUT_PROGRAM_PORT] = TaskComposerNodePorts::SINGLE;
     return ports;
   }
@@ -167,15 +162,10 @@ protected:
     auto profiles =
         getData(*context.data_storage, INPUT_PROFILES_PORT).template as<std::shared_ptr<ProfileDictionary>>();
 
-    tesseract_common::ManipulatorInfo input_manip_info;
-    auto manip_info_poly = getData(*context.data_storage, INPUT_MANIP_INFO_PORT, false);
-    if (!manip_info_poly.isNull())
-      input_manip_info = manip_info_poly.template as<tesseract_common::ManipulatorInfo>();
-
     // Make a non-const copy of the input instructions to update the start/end
     auto& instructions = input_data_poly.template as<CompositeInstruction>();
-    assert(!(input_manip_info.empty() && instructions.getManipulatorInfo().empty()));
-    instructions.setManipulatorInfo(instructions.getManipulatorInfo().getCombined(input_manip_info));
+    if (instructions.getManipulatorInfo().empty())
+      throw std::runtime_error("Missing manipulator information");
 
     // --------------------
     // Fill out request
@@ -193,13 +183,14 @@ protected:
     if (console_bridge::getLogLevel() == console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG)
       request.verbose = true;
     PlannerResponse response = planner_->solve(request);
-    setData(*context.data_storage, INOUT_PROGRAM_PORT, response.results);
 
     // --------------------
     // Verify Success
     // --------------------
     if (response)
     {
+      // Should only set on success to support error branching
+      setData(*context.data_storage, INOUT_PROGRAM_PORT, response.results);
       info->return_value = 1;
       info->color = "green";
       info->status_code = 1;
@@ -232,10 +223,6 @@ const std::string MotionPlannerTask<MotionPlannerType>::INPUT_ENVIRONMENT_PORT =
 
 template <typename MotionPlannerType>
 const std::string MotionPlannerTask<MotionPlannerType>::INPUT_PROFILES_PORT = "profiles";
-
-// Optional
-template <typename MotionPlannerType>
-const std::string MotionPlannerTask<MotionPlannerType>::INPUT_MANIP_INFO_PORT = "manip_info";
 
 }  // namespace tesseract_planning
 
