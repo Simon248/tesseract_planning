@@ -52,7 +52,8 @@ set(LIB_SOURCE_FILES
     src/nodes/raster_motion_task.cpp
     src/nodes/raster_only_motion_task.cpp
     src/profiles/check_input_profile.cpp
-    src/profiles/contact_check_profile.cpp)
+    src/profiles/contact_check_profile.cpp
+    src/raster_motion_with_approach_task.cpp)
 
 set(LIB_SOURCE_LINK_LIBRARIES
     ${PROJECT_NAME}
