@@ -38,6 +38,7 @@
 #include <tesseract_task_composer/planning/nodes/profile_switch_task.h>
 #include <tesseract_task_composer/planning/nodes/upsample_trajectory_task.h>
 #include <tesseract_task_composer/planning/nodes/raster_motion_task.h>
+#include <tesseract_task_composer/planning/nodes/raster_motion_with_approach_task.h>
 #include <tesseract_task_composer/planning/nodes/raster_only_motion_task.h>
 #include <tesseract_task_composer/planning/nodes/motion_planner_task.hpp>
 #include <tesseract_task_composer/planning/nodes/process_planning_input_task.h>
@@ -57,6 +58,7 @@ using MinLengthTaskFactory = TaskComposerTaskFactory<MinLengthTask>;
 using ProfileSwitchTaskFactory = TaskComposerTaskFactory<ProfileSwitchTask>;
 using UpsampleTrajectoryTaskFactory = TaskComposerTaskFactory<UpsampleTrajectoryTask>;
 using RasterMotionTaskFactory = TaskComposerTaskFactory<RasterMotionTask>;
+using RasterMotionWithApproachTaskFactory = TaskComposerTaskFactory<RasterMotionWithApproachTask>;
 using RasterOnlyMotionTaskFactory = TaskComposerTaskFactory<RasterOnlyMotionTask>;
 using SimpleMotionPlannerTaskFactory = TaskComposerTaskFactory<MotionPlannerTask<SimpleMotionPlanner>>;
 using ProcessPlanningInputTaskFactory = TaskComposerTaskFactory<ProcessPlanningInputTask>;
@@ -90,6 +92,8 @@ TESSERACT_ADD_TASK_COMPOSER_NODE_PLUGIN(tesseract_planning::ProfileSwitchTaskFac
 TESSERACT_ADD_TASK_COMPOSER_NODE_PLUGIN(tesseract_planning::UpsampleTrajectoryTaskFactory, UpsampleTrajectoryTaskFactory)
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 TESSERACT_ADD_TASK_COMPOSER_NODE_PLUGIN(tesseract_planning::RasterMotionTaskFactory, RasterMotionTaskFactory)
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+TESSERACT_ADD_TASK_COMPOSER_NODE_PLUGIN(tesseract_planning::RasterMotionWithApproachTaskFactory, RasterMotionWithApproachTaskFactory)
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 TESSERACT_ADD_TASK_COMPOSER_NODE_PLUGIN(tesseract_planning::RasterOnlyMotionTaskFactory, RasterOnlyMotionTaskFactory)
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)

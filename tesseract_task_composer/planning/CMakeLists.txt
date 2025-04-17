@@ -50,6 +50,7 @@ set(LIB_SOURCE_FILES
     src/nodes/update_start_state_task.cpp
     src/nodes/upsample_trajectory_task.cpp
     src/nodes/raster_motion_task.cpp
+    src/nodes/raster_motion_with_approach_task.cpp
     src/nodes/raster_only_motion_task.cpp
     src/profiles/check_input_profile.cpp
     src/profiles/contact_check_profile.cpp)
