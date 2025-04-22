@@ -1,6 +1,6 @@
 /**
- * @file raster_motion_task.h
- * @brief Raster motion task with transitions
+ * @file raster_motion_with_approach_task.h
+ * @brief Raster motion task with approach and retraction
  *
  * @author Levi Armstrong
  * @date July 29. 2022
@@ -41,14 +41,14 @@ namespace tesseract_planning
 class TaskComposerPluginFactory;
 
 /**
- * @brief The RasterCtMotionTask class
+ * @brief The RasterMotionWithApproachTask class
  * @details The required format is below.
  *
  * Composite
  * {
-*   Composite - Approach
-*   Composite - Raster
-*   Composite - Retreat
+ *   Composite - approach
+ *   Composite - raster
+ *   Composite - retraction
  * }
  */
 
@@ -65,16 +65,16 @@ public:
 
   RasterMotionWithApproachTask();
   explicit RasterMotionWithApproachTask(std::string name,
-                            std::string input_key,
-                            std::string output_key,
-                            bool conditional,
-                            TaskFactory freespace_task_factory,
-                            TaskFactory raster_task_factory,
-                            TaskFactory transition_task_factory);
+                                        std::string input_key,
+                                        std::string output_key,
+                                        bool conditional,
+                                        TaskFactory freespace_task_factory,
+                                        TaskFactory raster_task_factory,
+                                        TaskFactory transition_task_factory);
 
   explicit RasterMotionWithApproachTask(std::string name,
-                            const YAML::Node& config,
-                            const TaskComposerPluginFactory& plugin_factory);
+                                        const YAML::Node& config,
+                                        const TaskComposerPluginFactory& plugin_factory);
 
   ~RasterMotionWithApproachTask() override = default;
   RasterMotionWithApproachTask(const RasterMotionWithApproachTask&) = delete;
@@ -105,4 +105,4 @@ protected:
 
 BOOST_CLASS_EXPORT_KEY2(tesseract_planning::RasterMotionWithApproachTask, "RasterMotionWithApproachTask")
 
-#endif  // TESSERACT_TASK_COMPOSER_RASTER_MOTION_TASK_H
+#endif  // TESSERACT_TASK_COMPOSER_RASTER_MOTION_WITH_APPROACH_TASK_H
