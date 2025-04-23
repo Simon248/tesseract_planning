@@ -457,7 +457,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
     transition_idx++;
   }
 
-  // Plan from_start - preceded by the first raster
+  // Plan from_start 
   auto from_start_input = program[0].template as<CompositeInstruction>();
   from_start_input.setManipulatorInfo(from_start_input.getManipulatorInfo().getCombined(program_manip_info));
 
