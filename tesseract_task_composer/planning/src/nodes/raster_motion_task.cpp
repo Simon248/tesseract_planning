@@ -390,12 +390,15 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
     raster_input.setManipulatorInfo(raster_input.getManipulatorInfo().getCombined(program_manip_info));
 
     // Get Start Plan Instruction
-    const InstructionPoly& pre_input_instruction = program[idx - 1];
-    assert(pre_input_instruction.isCompositeInstruction());
-    const auto& tci = pre_input_instruction.as<CompositeInstruction>();
-    const auto* li = tci.getLastMoveInstruction();
-    assert(li != nullptr);
-    raster_input.insertMoveInstruction(raster_input.begin(), *li);
+
+    //////// Supression cause need insertion at mlower Ci level ///////////////////////
+
+    // const InstructionPoly& pre_input_instruction = program[idx - 1];
+    // assert(pre_input_instruction.isCompositeInstruction());
+    // const auto& tci = pre_input_instruction.as<CompositeInstruction>();
+    // const auto* li = tci.getLastMoveInstruction();
+    // assert(li != nullptr);
+    // raster_input.insertMoveInstruction(raster_input.begin(), *li);
 
     const std::string task_name = "Raster #" + std::to_string(raster_idx + 1) + ": " + raster_input.getDescription();
     auto raster_results = raster_task_factory_(task_name, raster_idx + 1);
@@ -424,10 +427,18 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
     // Get Start Plan Instruction
     const InstructionPoly& pre_input_instruction = program[idx - 1];
     assert(pre_input_instruction.isCompositeInstruction());
-    const auto& tci = pre_input_instruction.as<CompositeInstruction>();
-    const auto* li = tci.getLastMoveInstruction();
-    assert(li != nullptr);
-    transition_input.insertMoveInstruction(transition_input.begin(), *li);
+    const auto& tci_pre = pre_input_instruction.as<CompositeInstruction>();
+    const auto* li_pre = tci_pre.getLastMoveInstruction();
+    assert(li_pre != nullptr);
+    transition_input.insertMoveInstruction(transition_input.begin(), *li_pre);
+
+    // Get End Plan Instruction
+    const InstructionPoly& post_input_instruction = program[idx + 1];
+    assert(post_input_instruction.isCompositeInstruction());
+    const auto& tci_post = post_input_instruction.as<CompositeInstruction>();
+    const auto* li_post = tci_post.getFirstMoveInstruction();
+    assert(li_post != nullptr);
+    transition_input.insertMoveInstruction(transition_input.end(), *li_post);
 
     const std::string task_name =
         "Transition #" + std::to_string(transition_idx + 1) + ": " + transition_input.getDescription();
@@ -460,6 +471,16 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
   // Plan from_start 
   auto from_start_input = program[0].template as<CompositeInstruction>();
   from_start_input.setManipulatorInfo(from_start_input.getManipulatorInfo().getCombined(program_manip_info));
+
+
+  // Get End Plan Instruction
+  const InstructionPoly& post_input_instruction = program[1];
+  assert(post_input_instruction.isCompositeInstruction());
+  const auto& tci_post = post_input_instruction.as<CompositeInstruction>();
+  const auto* li_post = tci_post.getFirstMoveInstruction();
+  assert(li_post != nullptr);
+  from_start_input.insertMoveInstruction(from_start_input.end(), *li_post);
+
 
   auto from_start_results = freespace_task_factory_("From Start: " + from_start_input.getDescription(), 0);
   auto from_start_pipeline_uuid = task_graph.addNode(std::move(from_start_results.node));

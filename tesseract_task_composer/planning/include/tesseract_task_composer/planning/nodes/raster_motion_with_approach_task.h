@@ -68,9 +68,8 @@ public:
                                         std::string input_key,
                                         std::string output_key,
                                         bool conditional,
-                                        TaskFactory freespace_task_factory,
-                                        TaskFactory raster_task_factory,
-                                        TaskFactory transition_task_factory);
+                                        TaskFactory approach_and_retreat_task_factory,
+                                        TaskFactory raster_task_factory);
 
   explicit RasterMotionWithApproachTask(std::string name,
                                         const YAML::Node& config,
@@ -86,9 +85,8 @@ public:
   bool operator!=(const RasterMotionWithApproachTask& rhs) const;
 
 protected:
-  TaskFactory freespace_task_factory_;
+  TaskFactory approach_and_retreat_task_factory_;
   TaskFactory raster_task_factory_;
-  TaskFactory transition_task_factory_;
 
   friend struct tesseract_common::Serialization;
   friend class boost::serialization::access;

@@ -98,13 +98,11 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
                                    std::string input_key,
                                    std::string output_key,
                                    bool conditional,
-                                   TaskFactory freespace_task_factory,
-                                   TaskFactory raster_task_factory,
-                                   TaskFactory transition_task_factory)
+                                   TaskFactory approach_and_retreat_task_factory,
+                                   TaskFactory raster_task_factory)
   : TaskComposerTask(std::move(name), conditional)
-  , freespace_task_factory_(std::move(freespace_task_factory))
+  , approach_and_retreat_task_factory_(std::move(approach_and_retreat_task_factory))
   , raster_task_factory_(std::move(raster_task_factory))
-  , transition_task_factory_(std::move(transition_task_factory))
 {
   input_keys_.push_back(std::move(input_key));
   output_keys_.push_back(std::move(output_key));
@@ -127,7 +125,7 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
   if (output_keys_.size() > 1)
     throw std::runtime_error("RasterMotionWithApproachTask, config 'outputs' entry currently only supports one output key");
 
-  if (YAML::Node freespace_config = config["freespace"])
+  if (YAML::Node ApproachAndRetreat_config = config["ApproachAndRetreat"])
   {
     std::string task_name;
     bool has_abort_terminal_entry{ false };
@@ -135,12 +133,12 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
     std::vector<std::string> indexing;
     std::map<std::string, std::string> remapping;
 
-    if (YAML::Node n = freespace_config["task"])
+    if (YAML::Node n = ApproachAndRetreat_config["task"])
       task_name = n.as<std::string>();
     else
       throw std::runtime_error("RasterMotionWithApproachTask, entry 'freespace' missing 'task' entry");
 
-    if (YAML::Node task_config = freespace_config["config"])
+    if (YAML::Node task_config = ApproachAndRetreat_config["config"])
     {
       if (YAML::Node n = task_config["abort_terminal"])
       {
@@ -166,16 +164,16 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
       if (YAML::Node n = task_config["indexing"])
         indexing = n.as<std::vector<std::string>>();
       else
-        throw std::runtime_error("RasterMotionWithApproachTask, entry 'freespace' missing 'indexing' entry");
+        throw std::runtime_error("RasterMotionWithApproachTask, entry 'ApproachAndRetreat' missing 'indexing' entry");
     }
     else
     {
-      throw std::runtime_error("RasterMotionWithApproachTask, entry 'freespace' missing 'config' entry");
+      throw std::runtime_error("RasterMotionWithApproachTask, entry 'ApproachAndRetreat' missing 'config' entry");
     }
 
     if (has_abort_terminal_entry)
     {
-      freespace_task_factory_ = [task_name, abort_terminal_index, remapping, indexing, &plugin_factory](
+      approach_and_retreat_task_factory_ = [task_name, abort_terminal_index, remapping, indexing, &plugin_factory](
                                     const std::string& name, std::size_t index) {
         auto tr = createTask(name, task_name, remapping, indexing, plugin_factory, index);
         static_cast<TaskComposerGraph&>(*tr.node).setTerminalTriggerAbortByIndex(abort_terminal_index);
@@ -184,7 +182,7 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
     }
     else
     {
-      freespace_task_factory_ = [task_name, remapping, indexing, &plugin_factory](const std::string& name,
+      approach_and_retreat_task_factory_ = [task_name, remapping, indexing, &plugin_factory](const std::string& name,
                                                                                   std::size_t index) {
         return createTask(name, task_name, remapping, indexing, plugin_factory, index);
       };
@@ -192,7 +190,7 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
   }
   else
   {
-    throw std::runtime_error("RasterMotionWithApproachTask: missing 'freespace' entry");
+    throw std::runtime_error("RasterMotionWithApproachTask: missing 'ApproachAndRetreat' entry");
   }
 
   if (YAML::Node raster_config = config["raster"])
@@ -263,73 +261,6 @@ RasterMotionWithApproachTask::RasterMotionWithApproachTask(std::string name,
     throw std::runtime_error("RasterMotionWithApproachTask: missing 'raster' entry");
   }
 
-  if (YAML::Node transition_config = config["transition"])
-  {
-    std::string task_name;
-    bool has_abort_terminal_entry{ false };
-    int abort_terminal_index{ -1 };
-    std::vector<std::string> indexing;
-    std::map<std::string, std::string> remapping;
-
-    if (YAML::Node n = transition_config["task"])
-      task_name = n.as<std::string>();
-    else
-      throw std::runtime_error("RasterMotionWithApproachTask, entry 'transition' missing 'task' entry");
-
-    if (YAML::Node task_config = transition_config["config"])
-    {
-      if (YAML::Node n = task_config["abort_terminal"])
-      {
-        has_abort_terminal_entry = true;
-        abort_terminal_index = n.as<int>();
-      }
-
-      if (task_config["input_remapping"])  // NOLINT
-        throw std::runtime_error("RasterMotionWithApproachTask, input_remapping is no longer supported use 'remapping'");
-
-      if (task_config["output_remapping"])  // NOLINT
-        throw std::runtime_error("RasterMotionWithApproachTask, output_remapping is no longer supported use 'remapping'");
-
-      if (YAML::Node n = task_config["remapping"])
-        remapping = n.as<std::map<std::string, std::string>>();
-
-      if (task_config["input_indexing"])  // NOLINT
-        throw std::runtime_error("RasterMotionWithApproachTask, input_indexing is no longer supported use 'indexing'");
-
-      if (task_config["output_indexing"])  // NOLINT
-        throw std::runtime_error("RasterMotionWithApproachTask, output_indexing is no longer supported use 'indexing'");
-
-      if (YAML::Node n = task_config["indexing"])
-        indexing = n.as<std::vector<std::string>>();
-      else
-        throw std::runtime_error("RasterMotionWithApproachTask, entry 'transition' missing 'indexing' entry");
-    }
-    else
-    {
-      throw std::runtime_error("RasterMotionWithApproachTask, entry 'transition' missing 'config' entry");
-    }
-
-    if (has_abort_terminal_entry)
-    {
-      transition_task_factory_ = [task_name, abort_terminal_index, remapping, indexing, &plugin_factory](
-                                     const std::string& name, std::size_t index) {
-        auto tr = createTask(name, task_name, remapping, indexing, plugin_factory, index);
-        static_cast<TaskComposerGraph&>(*tr.node).setTerminalTriggerAbortByIndex(abort_terminal_index);
-        return tr;
-      };
-    }
-    else
-    {
-      transition_task_factory_ = [task_name, remapping, indexing, &plugin_factory](const std::string& name,
-                                                                                   std::size_t index) {
-        return createTask(name, task_name, remapping, indexing, plugin_factory, index);
-      };
-    }
-  }
-  else
-  {
-    throw std::runtime_error("RasterMotionWithApproachTask: missing 'transition' entry");
-  }
 }
 
 bool RasterMotionWithApproachTask::operator==(const RasterMotionWithApproachTask& rhs) const { return (TaskComposerTask::operator==(rhs)); }
@@ -393,9 +324,6 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
   auto raster_uuid = task_graph.addNode(std::move(raster_results.node));
   context.data_storage->setData(raster_results.input_key, raster_input);
 
-  // Connect the start task to the raster task
-  task_graph.addEdges(start_uuid, { raster_uuid });
-
   // Process the approach segment
   // Use the first point of the raster for the approach
   const auto* first_raster_point = raster_input.getFirstMoveInstruction();
@@ -403,7 +331,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
   approach_input.insertMoveInstruction(approach_input.end(), *first_raster_point);
 
   const std::string approach_task_name = "Approach: " + approach_input.getDescription();
-  auto approach_results = freespace_task_factory_(approach_task_name, 2);
+  auto approach_results = approach_and_retreat_task_factory_(approach_task_name, 2);
   approach_results.node->setConditional(false);
   auto approach_uuid = task_graph.addNode(std::move(approach_results.node));
   context.data_storage->setData(approach_results.input_key, approach_input);
@@ -415,19 +343,31 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
   retraction_input.insertMoveInstruction(retraction_input.begin(), *last_raster_point);
 
   const std::string retraction_task_name = "Retraction: " + retraction_input.getDescription();
-  auto retraction_results = freespace_task_factory_(retraction_task_name, 3);
+  auto retraction_results = approach_and_retreat_task_factory_(retraction_task_name, 3);
   retraction_results.node->setConditional(false);
   auto retraction_uuid = task_graph.addNode(std::move(retraction_results.node));
   context.data_storage->setData(retraction_results.input_key, retraction_input);
 
-  // Connect the raster task to the retraction task
+  // update start retraction task
   std::string raster_output_key = raster_results.output_key;
   auto update_retraction_start_task = std::make_unique<UpdateStartStateTask>(
       "UpdateRetractionStartStateTask", retraction_results.input_key, raster_output_key, retraction_results.output_key, false);
   auto update_retraction_start_uuid = task_graph.addNode(std::move(update_retraction_start_task));
 
-  task_graph.addEdges(update_retraction_start_uuid, { retraction_uuid });
+  // Update the end state of the approach task
+  auto update_approach_end_task = std::make_unique<UpdateEndStateTask>(
+    "UpdateApproachEndStateTask", approach_results.input_key, raster_results.output_key, approach_results.output_key, false);
+  auto update_approach_end_uuid = task_graph.addNode(std::move(update_approach_end_task));
+  
+
+  // Connect the nodes
+  task_graph.addEdges(start_uuid, { raster_uuid });
   task_graph.addEdges(raster_uuid, { update_retraction_start_uuid });
+  task_graph.addEdges(raster_uuid, { update_approach_end_uuid });
+  task_graph.addEdges(update_retraction_start_uuid, { retraction_uuid });
+  task_graph.addEdges(update_approach_end_uuid, { approach_uuid });
+
+
 
   // Execute the task graph
   TaskComposerFuture::UPtr future = executor.value().get().run(task_graph, context.problem, context.data_storage);
@@ -500,7 +440,11 @@ void RasterMotionWithApproachTask::checkTaskInput(const tesseract_common::AnyPol
   const auto& composite = input.as<CompositeInstruction>();
   composite.print(); //contient app1, raster1, retract1, app2, raster2, retract2
 
-
+  if (composite.size() != 3)
+  {
+    CONSOLE_BRIDGE_logError("%s", composite);
+    throw std::runtime_error("RasterMotionWithApproachTask, input must contain exactly 3 elements (approach, raster, retraction)");
+  }
 
   // Check that the composite has exactly 3 elements (approach, raster, retraction)
   for (std::size_t index = 0; index < composite.size(); index++)
@@ -510,13 +454,9 @@ void RasterMotionWithApproachTask::checkTaskInput(const tesseract_common::AnyPol
     CONSOLE_BRIDGE_logError("%s", composite.at(index));
       throw std::runtime_error("RasterMotionWithApproachTask, input must contain only composite instructions");
     }
-    if (composite.at(index).as<CompositeInstruction>().size() != 3)
-    {
-        throw std::runtime_error("RasterMotionWithApproachTask, input must contain composite containing exactly 3 elements (approach, raster, retraction)");
-    }
-    }
+  }
   
-// EN fait il faudrait teser que tout les enfants font 3
+
 
   // Check that all elements are composites
   for (std::size_t index = 0; index < composite.size(); index++)
