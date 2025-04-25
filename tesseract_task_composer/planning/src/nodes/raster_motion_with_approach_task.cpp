@@ -356,7 +356,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
 
   // Update the end state of the approach task
   auto update_approach_end_task = std::make_unique<UpdateEndStateTask>(
-    "UpdateApproachEndStateTask", approach_results.input_key, raster_results.output_key, approach_results.output_key, false);
+    "UpdateApproachEndStateTask", approach_results.input_key, raster_output_key, approach_results.output_key, false);
   auto update_approach_end_uuid = task_graph.addNode(std::move(update_approach_end_task));
   
 
