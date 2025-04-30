@@ -552,7 +552,11 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
   }
 
   program.clear();
-  program.emplace_back(context.data_storage->getData(from_start_results.output_key).as<CompositeInstruction>());
+
+  CompositeInstruction from_start = context.data_storage->getData(from_start_results.output_key).as<CompositeInstruction>();
+  from_start.erase(from_start.end());
+  program.emplace_back(from_start);
+
   for (std::size_t i = 0; i < raster_tasks.size(); ++i)
   {
     const auto& raster_output_key = raster_tasks[i].second.second;
