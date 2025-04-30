@@ -391,8 +391,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
 
     // Get Start Plan Instruction
 
-    //////// Supression cause need insertion at mlower Ci level ///////////////////////
-
+    //////// Supression cause need insertion at lower Ci level ///////////////////////
     // const InstructionPoly& pre_input_instruction = program[idx - 1];
     // assert(pre_input_instruction.isCompositeInstruction());
     // const auto& tci = pre_input_instruction.as<CompositeInstruction>();
