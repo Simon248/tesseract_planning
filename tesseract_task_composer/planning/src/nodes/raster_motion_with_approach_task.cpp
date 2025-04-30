@@ -454,7 +454,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
   // Add the approach segment
   std::string approach_output_key = approach_results.output_key;
   CompositeInstruction approach = context.data_storage->getData(approach_output_key).as<CompositeInstruction>();
-  approach.erase(approach.end() - 1); // Remove the last point that was copied from the raster
+  approach.erase(approach.end()); // Remove the last point that was copied from the raster
   raster_with_approach.push_back(approach);
 
   // Add the raster segment
