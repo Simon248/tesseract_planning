@@ -568,6 +568,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
       const auto& transition_output_key = transition_keys[i].second;
       CompositeInstruction transition = context.data_storage->getData(transition_output_key).as<CompositeInstruction>();
       transition.erase(transition.begin());
+      transition.erase(transition.end());
       program.emplace_back(transition);
     }
   }
