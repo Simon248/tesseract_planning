@@ -561,7 +561,6 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
   {
     const auto& raster_output_key = raster_tasks[i].second.second;
     CompositeInstruction segment = context.data_storage->getData(raster_output_key).as<CompositeInstruction>();
-    segment.erase(segment.begin());
     program.emplace_back(segment);
 
     if (i < raster_tasks.size() - 1)
