@@ -351,7 +351,27 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
 
   // Process the raster segment first
   const std::string raster_task_name = "Raster: " + raster_input.getDescription();
-  auto raster_results = raster_task_factory_(raster_task_name, 1);
+
+
+  // Extract the instance index from the parent task name
+  // The parent task name is in the format "Raster #X: ..."
+  // We can extract this from the input_keys_[0] which is in the format "RasterWithApproachPipeline_output_dataX"
+  std::size_t instance_idx = 0;
+  std::string input_key = input_keys_[0];
+  size_t data_pos = input_key.find("_data");
+  if (data_pos != std::string::npos) {
+    std::string idx_str = input_key.substr(data_pos + 5);
+    try {
+      instance_idx = std::stoull(idx_str); 
+    } catch (...) {
+      instance_idx = 0;
+    }
+  }
+
+  // Use instance_idx to create unique indices for subtasks
+  // Base index for this instance (each instance gets 3 indices)
+  std::size_t base_idx = (instance_idx * 3) + 1;
+  auto raster_results = raster_task_factory_(raster_task_name, base_idx);
   raster_results.node->setConditional(false);
   auto raster_uuid = task_graph.addNode(std::move(raster_results.node));
   context.data_storage->setData(raster_results.input_key, raster_input);
@@ -363,7 +383,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
   approach_input.insertMoveInstruction(approach_input.end(), *first_raster_point);
 
   const std::string approach_task_name = "Approach: " + approach_input.getDescription();
-  auto approach_results = approach_and_retreat_task_factory_(approach_task_name, 2);
+  auto approach_results = approach_and_retreat_task_factory_(approach_task_name, base_idx + 1);
   approach_results.node->setConditional(false);
   auto approach_uuid = task_graph.addNode(std::move(approach_results.node));
   context.data_storage->setData(approach_results.input_key, approach_input);
@@ -375,7 +395,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
   retraction_input.insertMoveInstruction(retraction_input.begin(), *last_raster_point);
 
   const std::string retraction_task_name = "Retraction: " + retraction_input.getDescription();
-  auto retraction_results = approach_and_retreat_task_factory_(retraction_task_name, 3);
+  auto retraction_results = approach_and_retreat_task_factory_(retraction_task_name, base_idx + 2);
   retraction_results.node->setConditional(false);
   auto retraction_uuid = task_graph.addNode(std::move(retraction_results.node));
   context.data_storage->setData(retraction_results.input_key, retraction_input);
