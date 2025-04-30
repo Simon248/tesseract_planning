@@ -48,6 +48,12 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_task_composer/core/task_composer_graph.h>
 
 #include <tesseract_command_language/composite_instruction.h>
+/////  DEBUG
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <filesystem> 
+
 
 namespace
 {
@@ -300,6 +306,32 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionWithApproachTask::runImpl(Task
 
   auto& raster_with_approach = input_data_poly.template as<CompositeInstruction>();
   TaskComposerGraph task_graph;
+
+//   //////////////DEBUG/////////////////////
+
+// // Sauvegarder le buffer original de cout
+
+// std::stringstream buffer;
+// std::streambuf* cout_buf = std::cout.rdbuf(); // sauvegarde cout
+
+// std::cout.rdbuf(buffer.rdbuf());              // redirige cout vers buffer
+// raster_with_approach.print("Program: ");
+// std::cout.rdbuf(cout_buf);                    // restaure cout
+
+// // Maintenant le contenu est dans buffer
+// std::ofstream out("/tmp/tess_dot_graph/program_raster_with_approach_task_log.txt", std::ios::app);
+// if (!out)
+// {
+//   std::cerr << "Erreur : impossible d'ouvrir le fichier" << std::endl;
+// }
+// else
+// {
+//   out << buffer.str(); // écrit seulement ce que tu veux
+// }
+// //////////////////////////////////
+
+
+
 
   tesseract_common::ManipulatorInfo program_manip_info = raster_with_approach.getManipulatorInfo().getCombined(problem.manip_info);
 
