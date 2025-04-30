@@ -466,13 +466,13 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
 
     transition_idx++;
   }
-
+//// FROM START ////
   // Plan from_start 
   auto from_start_input = program[0].template as<CompositeInstruction>();
   from_start_input.setManipulatorInfo(from_start_input.getManipulatorInfo().getCombined(program_manip_info));
 
 
-  // Get End Plan Instruction
+  // Insert first raster waypoint at end of 'from_start'
   const InstructionPoly& post_input_instruction = program[1];
   assert(post_input_instruction.isCompositeInstruction());
   const auto& tci_post = post_input_instruction.as<CompositeInstruction>();
@@ -484,6 +484,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
   auto from_start_results = freespace_task_factory_("From Start: " + from_start_input.getDescription(), 0);
   auto from_start_pipeline_uuid = task_graph.addNode(std::move(from_start_results.node));
 
+  // Update the inserted point with articular position from raster planner
   const auto& first_raster_output_key = raster_tasks[0].second.second;
   auto update_end_state_task = std::make_unique<UpdateEndStateTask>("UpdateEndStateTask",
                                                                     from_start_results.input_key,
@@ -497,11 +498,12 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
   task_graph.addEdges(update_end_state_uuid, { from_start_pipeline_uuid });
   task_graph.addEdges(raster_tasks[0].first, { update_end_state_uuid });
 
+////TO_END////
   // Plan to_end - preceded by the last raster
   auto to_end_input = program.back().template as<CompositeInstruction>();
   to_end_input.setManipulatorInfo(to_end_input.getManipulatorInfo().getCombined(program_manip_info));
 
-  // Get Start Plan Instruction
+  // Insert last point of last raster in 'to_end'
   const InstructionPoly& pre_input_instruction = program[program.size() - 2];
   assert(pre_input_instruction.isCompositeInstruction());
   const auto& tci = pre_input_instruction.as<CompositeInstruction>();
@@ -512,6 +514,7 @@ std::unique_ptr<TaskComposerNodeInfo> RasterMotionTask::runImpl(TaskComposerCont
   auto to_end_results = freespace_task_factory_("To End: " + to_end_input.getDescription(), program.size());
   auto to_end_pipeline_uuid = task_graph.addNode(std::move(to_end_results.node));
 
+  // Update the inserted point with articular position from raster planner
   const auto& last_raster_output_key = raster_tasks.back().second.second;
   auto update_start_state_task = std::make_unique<UpdateStartStateTask>(
       "UpdateStartStateTask", to_end_results.input_key, last_raster_output_key, to_end_results.output_key, false);
